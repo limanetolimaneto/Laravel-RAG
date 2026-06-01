@@ -27,3 +27,43 @@ GET                /ai-db-embedding    Scans directory, triggers parsers, and pu
 GET                /ai-search          Tests similarity. Returns the top 3 text chunks most relevant to the question parameter.
 GET                /ai-chat            Full RAG workflow. Takes a question, searches context, and returns the AI-generated answer.
 
+---
+
+💻 Tech Stack
+Framework: 
+Laravel 11+Database: 
+MySQLQueue Driver: Database / Redis
+Embeddings Provider: Jina AI (jina-embeddings-v2-base-en)
+LLM Orchestration: Groq API (llama-3.3-70b-versatile)
+Dependencies: smalot/pdfparser (for PDF text extraction)
+
+---
+
+📦 Core Component Breakdown
+1. Extensible Document Parsing
+Uses a Factory Pattern (DocumentFactoryInterface) to dynamically resolve the correct parser based on file extensions, making it straightforward to add supports like .docx or .csv in the future.
+
+2. Smart Text Chunking
+The ChunkingService implements a sliding window strategy to prevent information loss between chunks:
+```php
+// Chunks text into 100-character segments with a 20-character overlapping window
+$chunk->chunk($parsedText, chunkSize: 100, overlap: 20);
+```
+
+3. In-Memory Mathematical Vector Search
+Calculates the spatial distance between the query vector and your database content using a native Cosine Similarity formula:
+\(\text{Similarity}=\frac{A\cdot B}{\|A\|\|B\|}\)
+
+```php
+private function cosineSimilarity(array $a, array $b): float
+{
+    $dotProduct = 0; $normA = 0; $normB = 0;
+    foreach ($a as $index => $value) {
+        $dotProduct += $value * $b[$index];
+        $normA += $value ** 2;
+        $normB += $b[$index] ** 2;
+    }
+    return $dotProduct / (sqrt($normA) * sqrt($normB));
+}
+```
+
