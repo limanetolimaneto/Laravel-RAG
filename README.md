@@ -103,3 +103,50 @@ JINA_API_KEY=your_jina_ai_key_here
 GROQ_API_KEY=your_groq_key_here
 ```
 
+4. Run migrations:
+```bash
+php artisan migrate
+```
+
+5. Place your source files:
+Put your .txt and .pdf school data files directly into the following directory:
+storage/app/rag-data/
+
+6. Start the queue worker:
+```bash
+php artisan queue:work
+```
+
+7. Run the local server:
+```bash
+php artisan serve
+```
+
+---
+
+🔍 Usage Examples
+
+1. Ingest Data:
+```bash
+curl http://127.0.0
+```
+
+Response
+```json
+{
+  "message": "Jobs dispatched successfully"
+}
+
+```
+
+3. Ask a Question (Full RAG Workflow)
+```bash
+curl http://127.0.0
+```
+Response
+```json
+{
+  "message": "response"
+}
+```
+
