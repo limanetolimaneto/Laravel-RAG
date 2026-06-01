@@ -18,3 +18,12 @@ A production-ready Retrieval-Augmented Generation (RAG) system built with Larave
 1. **Ingestion (`/ai-db-embedding`):** Scans the `storage/app/rag-data` folder ➡️ Dispatches queued jobs ➡️ Extracts text via specialized parsers ➡️ Segments text into chunks with mathematical overlap ➡️ Requests embeddings from Jina AI ➡️ Persists data into MySQL.
 2. **Retrieval & Generation (`/ai-chat`):** Vectorizes the user's question ➡️ Runs Cosine Similarity across the database ➡️ Fetches top 3 matching chunks ➡️ Injects chunks into a system prompt ➡️ Requests a deterministic answer from Groq.
 
+---
+
+## 🛰️ API Endpoints
+
+Method            Endpoint            Description
+GET                /ai-db-embedding    Scans directory, triggers parsers, and pushes chunk/embedding jobs to the queue.
+GET                /ai-search          Tests similarity. Returns the top 3 text chunks most relevant to the question parameter.
+GET                /ai-chat            Full RAG workflow. Takes a question, searches context, and returns the AI-generated answer.
+
