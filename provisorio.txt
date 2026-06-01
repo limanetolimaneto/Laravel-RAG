@@ -1,0 +1,155 @@
+Estou fazendo meu primeiro projeto com integraca com AI, RAG, em Laravel. Gostaria da sua ajuda.
+Eu simulei um ambiente real de uma escola de nivel Medio da Cidade de Paarl. 
+Em app/rag-data existem 14 documentos entre txt  pdf cm informacoes referentes a escola.
+Tem um endpoint que gera embeddings e salva no banco mysql.
+Tem outro endpoint que testa a similaridade entre a pergunta e as frases dos textos.
+Tem o endpoint pronto que recebe a pergunta .
+Vou lhe mostrar os principais arquivos pra voce me ajudar a concluir este projeto.
+
+1. api.php:
+Route::get('/ai-db-embedding', [DocumentIngestionController::class, 'ingest']);
+Route::get('/ai-search', [AIController::class, 'search']);
+Route::get('/ai-chat', [AIController::class, 'chat']); 
+
+2. DocumentIngestionController:
+public function ingest(){
+$documentList = $this->list->list();
+if(empty($documentList)){throw new DocumentListException('No documents found for ingestion.');};
+$jobDispatched = $this->dispatch->dispatch($documentList);
+if(! $jobDispatched){throw new \Exception('Error dispatching job.');};
+return response()->json(['message' => 'Jobs dispatched successfully']);
+}
+
+3. AIController:
+public function search(Request $request){
+$question = $request->input('question');
+return response()->json(
+$this->search->search($question)
+);}
+...
+public function chat(Request $request){
+$question = $request->input('question');
+$chunks = $this->search->search($question);
+$prompt = $this->prompt->build($question, $chunks);
+$answer = $this->chat->answer($prompt);
+return response()->json(['answer' => $answer,'sources' => $chunks,]);
+} 
+
+4. DocumentParserInterface:
+interface DocumentParserInterface{public function parse(string $path):string;}
+
+5. DocumentFactoryInterface:
+public function make(string $path): DocumentParserInterface{
+$extension = pathinfo($path, PATHINFO_EXTENSION);
+return match ($extension) {'txt' => resolve(TXTParserService::class),'pdf' => resolve(PDFParserService::class),default => throw new \Exception('Formato não suportado')};}
+
+6. JobDispatchService:
+public function dispatch($documents){foreach ($documents as $item) {JOB::dispatch($item->getPathname());}return count($documents);}
+
+7. IngestDocumentJob:
+class IngestDocumentJob implements ShouldQueue{use Queueable, InteractsWithQueue;public function __construct(protected string $fileName){}
+public function handle(DocumentParserFactory $parser, ChunkingService $chunk, EmbeddingService $embed): void{
+$parserClass = $parser->make($this->fileName);
+$parsed = $parserClass->parse($this->fileName); 
+$chunkArray = $chunk->chunk($parsed);
+$embedArray = $embed->generate($chunkArray);
+foreach ($embedArray as $key => $value) {
+    $embeded [] = [
+        'document_name' => basename($this->fileName),
+        'content' => $chunkArray[$key],
+        'embedding' => json_encode($value),
+        'chunk_index' => $key,
+        'created_at' => now(), 
+        'updated_at'    => now(),
+    ];            
+} ... } }
+
+8. TXTParserService:
+...public function parse(string $path): string{ if (! file_exists($path)) { throw new \Exception("Arquivo não encontrado.");}
+return file_get_contents($path);}...
+
+9 PDFParserService:
+...public function parse(string $path): string{if (! file_exists($path)) { throw new \Exception('Arquivo não encontrado.');}$parser = new Parser();$pdf = $parser->parseFile($path);return $pdf->getText();}...
+
+10. DocumentListService:
+...public function list(): array{return File::files(storage_path('app/rag-data'));}...
+
+11. ChunkingService:
+...public function chunk( string $text, int $chunkSize = 100, int $overlap = 20): array {$chunks = [];$start = 0;$textLength = strlen($text);while ($start < $textLength) {$chunks[] = substr($text, $start, $chunkSize);$start += ($chunkSize - $overlap);}return $chunks;}...
+
+12. Embeddingservice:
+...public function generate(array $data): array{$response = Http::withHeaders(['Authorization' => 'Bearer ' . config('services.jina.api-key'),'Content-Type' => 'application/json',])->post('https://api.jina.ai/v1/embeddings', ['model' => 'jina-embeddings-v2-base-en','input' => $data,]);return collect($response['data'])->pluck('embedding')->toArray();}...
+
+13. VectorSearchService:
+    public function search(string $question): array
+    {
+        $questionEmbedding = $this->embeddingService->generate([$question])[0];
+        $embeddings = Embedding::all();
+        $results = [];
+
+        foreach ($embeddings as $embedding) {
+
+            $similarity = $this->cosineSimilarity(
+                $questionEmbedding,
+                $embedding->embedding
+            );
+
+            $results[] = [
+                'document_name' => $embedding->document_name,
+                'content' => $embedding->content,
+                'chunk_index' => $embedding->chunk_index,
+                'score' => $similarity,
+            ];
+        }
+
+        usort(
+            $results,
+            fn ($a, $b) => $b['score'] <=> $a['score']
+        );
+
+        return array_slice($results, 0, 3);
+    }
+
+    private function cosineSimilarity( array $a, array $b ): float
+    {
+        $dotProduct = 0;
+        $normA = 0;
+        $normB = 0;
+
+        foreach ($a as $index => $value) {
+
+            $dotProduct += $value * $b[$index];
+
+            $normA += $value ** 2;
+
+            $normB += $b[$index] ** 2;
+        }
+
+        return $dotProduct /
+            (sqrt($normA) * sqrt($normB));
+    }
+
+14.  PromptBuilderService
+    public function build(string $question, array $chunks): string
+    {
+        $context = collect($chunks)
+            ->pluck('content')
+            ->implode("\n\n---\n\n");
+
+        return "You are a helpful assistant. Use ONLY the context below to answer. CONTEXT: {$context} QUESTION: {$question} Answer clearly and concisely.";
+    }
+
+15. ChatService
+    public function answer(string $prompt): string
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . config('services.groq.api-key'),
+        ])->post('https://api.groq.com/openai/v1/chat/completions', [
+            'model' => 'llama-3.3-70b-versatile',
+            'messages' => [
+                ['role' => 'user', 'content' => $prompt]
+            ]
+        ]);
+
+        return $response['choices'][0]['message']['content'];
+    }

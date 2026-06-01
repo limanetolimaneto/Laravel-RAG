@@ -1,0 +1,101 @@
+=== PROBLEMA 1 - Uma chamada HTTP por chunk ===
+        HOJE:
+                foreach ($chunkings as $value) {
+                        $embed->generate($value);
+                }
+                Isso explode custo e tempo.
+                   - Embedding APIs aceitam batch.
+                   - A API da Jina AI aceita array.
+        BOA PRATICA:
+                [
+                   'input' => [
+                      'chunk1',
+                      'chunk2',
+                      'chunk3'
+                   ]
+                ]
+===============================================
+
+=== PROBLEMA 2 -  Embedding dentro da transaction ===
+        HOJE:
+                DB::transaction(function () {HTTP REQUEST});
+                Muito perigoso manter transaction aberta durante chamadas externas.
+                   - Pode lockar tabelas, degradar banco ou gerar timeout.
+        ARQUITETURA CORRETA:
+                Primeiro: 1 gerar embeddings, 2 montar array final
+                Depois: 3 transaction SOMENTE para inserts
+                Exemplo:
+                        $records = [];
+                        foreach (...) {
+                                $embedding = ...
+                                $records[] = ...
+                        }
+                DB::transaction(function () use ($records) {
+                        Embedding::insert($records);
+                });
+=====================================================
+
+=== PROBLEMA 3 - Inserts individuais ===
+        HOJE: 
+                Embedding::create() em loop.
+                Isso escala mal.
+        MELHOR: 
+                Embedding::insert($records);
+                Bulk insert. MUITO mais rápido.
+========================================
+
+=== PROBLEMA 4 - Nome do campo ===
+        HOJE: 
+                document_name mas e salvo: $this->fileName que aparentemente contém path completo.
+                Então: /storage/app/docs/file.pdf e não: file.pdf
+        MELHOR PRATICA: 
+                basename($this->fileName)
+==================================
+
+=== PROBLEMA 5 - Retornar container Laravel ===
+        HOJE:
+                DocumentParserFactory esta aplicada corretamente.
+        EVITAR: 
+                Retornar new TXTParserService().
+        MELHORIA:
+                Usar container do Laravel.
+                   - return app(TXTParserService::class);
+                Assim: suporta DI; suporta config; suporta mocks/teste
+========================
+
+=== CONCLUIDO 6 - Interface ===
+        HOJE:
+                Arquitetura limpa.
+                Você preparou sistema para: DOCX ,HTML ,Markdown ,CSV ,OCR e etc sem alterar pipeline principal.
+==============================
+
+=== CONCLUIDOS 7 e 8 - Parsers ===
+        HOJE:
+                Corretos.
+========================
+
+=== CRIAR EXCESSOES CUSTOMIZADAS ===
+        HOJE:
+                Em app/Services/Jobs/IngestDocumentJob:
+                catch (\Exception $e) {  Log::error("Error saving embeddings: " . $e->getMessage());Sugestão importante }
+        SUGESTAO:
+                Usar EmbeddingPersistenceException fica mais claro que Exception.
+        
+                  -  Parsing > DocumentParseException
+                  -  Embedding API > EmbeddingGenerationException
+                  -  Persistência > EmbeddingPersistenceException
+====================================
+
+========================
+        Seu ponto mais fraco atualmente: ChunkingService
+        Hoje: str_split($text, 100);
+        Isso quebra caracteres arbitrariamente.
+        Você destrói: contexto; frases; semântica.
+=====
+
+=== NOTAS ===
+   UMA CHAMADA POR CHUNK
+              
+
+
+=============
