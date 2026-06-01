@@ -67,3 +67,39 @@ private function cosineSimilarity(array $a, array $b): float
 }
 ```
 
+⚡ Installation & Setup
+Prerequisites
+PHP 8.2+
+Composer
+MySQL Database
+Jina AI API Key
+Groq API Key
+
+Step-by-Step Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com
+cd laravel-rag-school
+```
+
+2. Install dependencies:
+```bash
+composer install
+```
+3. Configure Environment Variables (.env):
+
+```ENV
+envDB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=laravel_rag
+DB_USERNAME=root
+DB_PASSWORD=
+
+QUEUE_CONNECTION=database
+
+JINA_API_KEY=your_jina_ai_key_here
+GROQ_API_KEY=your_groq_key_here
+```
+
