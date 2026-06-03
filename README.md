@@ -15,8 +15,19 @@ A production-ready Retrieval-Augmented Generation (RAG) system built with Larave
 
 ## 🛠️ Architecture & Workflow
 
-1. **Ingestion (`/ai-db-embedding`):** Scans the `storage/app/rag-data` folder ➡️ Dispatches queued jobs ➡️ Extracts text via specialized parsers ➡️ Segments text into chunks with mathematical overlap ➡️ Requests embeddings from Jina AI ➡️ Persists data into MySQL.
-2. **Retrieval & Generation (`/ai-chat`):** Vectorizes the user's question ➡️ Runs Cosine Similarity across the database ➡️ Fetches top 3 matching chunks ➡️ Injects chunks into a system prompt ➡️ Requests a deterministic answer from Groq.
+1. **Ingestion (`/ai-db-embedding`):** 
+➡️ Scans the `storage/app/rag-data` folder
+➡️ Dispatches queued jobs 
+➡️ Extracts text via specialized parsers 
+➡️ Segments text into chunks with mathematical overlap 
+➡️ Requests embeddings from Jina AI 
+➡️ Persists data into MySQL.
+2. **Retrieval & Generation (`/ai-chat`):** 
+➡️ Vectorizes the user's question 
+➡️ Runs Cosine Similarity across the database 
+➡️ Fetches top 3 matching chunks 
+➡️ Injects chunks into a system prompt 
+➡️ Requests a deterministic answer from Groq.
 
 ---
 
@@ -29,17 +40,27 @@ GET                /ai-chat            Full RAG workflow. Takes a question, sear
 
 ---
 
-💻 Tech Stack
-Framework: 
-Laravel 11+Database: 
-MySQLQueue Driver: Database / Redis
+## 💻 Tech Stack
+
+Framework: Laravel 11+ 
+Database: MySQL
+Queue Driver: Database / Redis
 Embeddings Provider: Jina AI (jina-embeddings-v2-base-en)
 LLM Orchestration: Groq API (llama-3.3-70b-versatile)
 Dependencies: smalot/pdfparser (for PDF text extraction)
 
 ---
 
-📦 Core Component Breakdown
+## 💾 Database Infrastructure Notes
+
+The system architecture handles vector search depending on the MySQL environment version:
+* **Development (MySQL 8.0.x):** Utilizes optimized SQL `JSON_EXTRACT` mathematical operations to compute dot products directly inside the database engine, avoiding PHP memory bottlenecks (`Embedding::all()` overhead).
+* **Production/Upgrade (MySQL 8.4+ LTS):** Migrates the schema to use the native `VECTOR(768)` data type paired with the hardware-accelerated `VECTOR_DISTANCE(..., 'COSINE')` function for enterprise-grade performance.
+
+---
+
+## 📦 Core Component Breakdown
+
 1. Extensible Document Parsing
 Uses a Factory Pattern (DocumentFactoryInterface) to dynamically resolve the correct parser based on file extensions, making it straightforward to add supports like .docx or .csv in the future.
 
@@ -67,7 +88,10 @@ private function cosineSimilarity(array $a, array $b): float
 }
 ```
 
-⚡ Installation & Setup
+---
+
+## ⚡ Installation & Setup
+
 Prerequisites
 PHP 8.2+
 Composer
@@ -124,7 +148,7 @@ php artisan serve
 
 ---
 
-🔍 Usage Examples
+## 🔍 Usage Examples
 
 1. Ingest Data:
 ```bash
