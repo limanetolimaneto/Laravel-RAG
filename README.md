@@ -318,7 +318,7 @@ Response
 ```bash
 curl -X POST http://localhost:8000/api/ai-chat \
 -H "Content-Type: application/json" \
--d '{ "question": "What is Clean Architecture?" }'
+-d '{ "question": "how much is the registration fee?" }'
 ```
 Response
 ```json
