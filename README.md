@@ -398,9 +398,11 @@ This project is licensed under the MIT License.
 
 ### Document Ingestion
 
+The ingestion endpoint scans the knowledge base directory, dispatches queue jobs, parses documents, and generates vector embeddings.
+
 ![Document Ingestion](docs/images/document-ingestion-work.png)
 
-The ingestion endpoint scans the knowledge base directory, dispatches queue jobs, parses documents, and generates vector embeddings.
+![Document Ingestion](docs/images/document-ingestion-work.png)
 
 ### Semantic Search
 
