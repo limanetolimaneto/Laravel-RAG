@@ -21,6 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-/storage/app/rag-data/*
+/storage/app/rag-data/**
+!/storage/app/
 !/storage/app/rag-data/
-!/storage/app/rag-data/**

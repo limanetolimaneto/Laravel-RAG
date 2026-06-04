@@ -116,8 +116,6 @@ Document ingestion → Parsing → Chunking → Embedding → Storage → Retrie
 
 ## ⚡ Installation & Setup
 
-## ⚡ Installation & Setup
-
 ### Prerequisites
 
 - PHP 8.2+
@@ -130,7 +128,7 @@ Document ingestion → Parsing → Chunking → Embedding → Storage → Retrie
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/laravel-rag.git
+git clone git@github.com:limanetolimaneto/Laravel-RAG.git
 cd laravel-rag
 ```
 
