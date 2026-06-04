@@ -305,7 +305,7 @@ Response
 ```bash
 curl -X POST http://localhost:8000/api/ai-search \
 -H "Content-Type: application/json" \
--d '{ "question": "What is Laravel?" }'
+-d '{ "question": "what is the school sport program?" }'
 ```
 Response
 ```json
@@ -402,20 +402,19 @@ The ingestion endpoint scans the knowledge base directory, dispatches queue jobs
 
 ![Document Ingestion](docs/images/document-ingestion-work.png)
 
-![Document Ingestion](docs/images/document-ingestion-work.png)
+![Document Ingestion](docs/images/document-ingestion-db-table.png)
 
 ### Semantic Search
 
-![Semantic Search](docs/images/search.png)
-
 The search endpoint converts the user's question into an embedding and retrieves the most relevant chunks using cosine similarity.
+
+![Semantic Search](docs/images/search-curl.png)
 
 ### AI Chat Response
 
-![AI Chat](docs/images/chat.png)
-
 The retrieved context is injected into the prompt, allowing the LLM to generate grounded responses based on the indexed documents.
 
+![AI Chat](docs/images/chat-curl.png)
 
 <!-- #endregion -->
 
