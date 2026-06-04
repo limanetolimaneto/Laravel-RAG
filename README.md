@@ -1,15 +1,275 @@
-# Laravel RAG (Retrieval-Augmented Generation) School Assistant
+<!-- #region Title -->
 
-A production-ready Retrieval-Augmented Generation (RAG) system built with Laravel, MySQL, Jina AI, and Groq. This application processes institutional data (PDF and TXT documents) from a simulated High School in Paarl, South Africa, stores their vector embeddings, and uses semantic search to provide accurate, context-aware answers to user queries using Large Language Models (LLMs).
+# Laravel AI Knowledge Base (RAG)
+
+This project demonstrates the implementation of a complete Retrieval-Augmented Generation (RAG) pipeline, including document ingestion, text chunking, embedding generation, vector similarity search, asynchronous processing with Laravel Queues, and LLM-powered answer generation.
+
+The application ingests PDF and TXT documents, generates vector embeddings, stores them in a relational database, and performs semantic retrieval to provide context-aware AI responses grounded in the retrieved content.
 
 ---
+
+<!-- #endregion -->
+
+<!-- #region Badges -->
+
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![PHP8+](https://img.shields.io/badge/Language-PHP8+-blue?logo=php)
+![Laravel 11](https://img.shields.io/badge/backend-Laravel-red?logo=laravel)
+![MySQL 8.4](https://img.shields.io/badge/database-MySQL-yellow?logo=mysql)
+![RAG](https://img.shields.io/badge/AI-RAG-purple)
+![Embeddings](https://img.shields.io/badge/Embeddings-Jina_AI-orange)
+![Llama 3.3](https://img.shields.io/badge/Model-Llama_3.3_70B-blue)
+![Queues](https://img.shields.io/badge/Architecture-Queues-lightgrey)
+![Architecture](https://img.shields.io/badge/Architecture-Clean_Architecture-success)
+
+---
+
+<!-- #endregion -->
+
+<!-- #region TechStack -->
+
+## 💻 Tech Stack
+
+- PHP 8.2+
+- Laravel 11
+- MySQL 8.x
+- Laravel Queues
+- Groq (llama-3.3-70b-versatile)
+- Jina AI (jina-embeddings-v2-base-en)
+- smalot/pdfparser
+
+---
+
+<!-- #endregion -->
+
+<!-- #region KeyFeatures -->
 
 ## 🚀 Key Features
 
 * **Asynchronous Ingestion Pipeline:** Uses Laravel Queues to parse files (`.txt`, `.pdf`) and generate vector embeddings without blocking the application.
 * **Semantic Vector Search:** Implements a pure PHP/MySQL Cosine Similarity algorithm to find the most relevant context for any user query.
-* **Context-Driven AI Chat:** Leverages Groq (`llama-3.3-70b-versatile`) and Jina AI (`jina-embeddings-v2-base-en`) to guarantee hallucination-free answers based *only* on provided school files.
+* **Context-Driven AI Chat:** Leverages Groq (`llama-3.3-70b-versatile`) and Jina AI (`jina-embeddings-v2-base-en`) to generate responses grounded in retrieved contextual information, significantly reducing hallucinations.
 * **Clean Architecture:** Fully decoupled components utilizing Interfaces, Factories, Jobs, and dedicated Service layers.
+
+---
+
+<!-- #endregion -->
+
+<!-- #region Architecture -->
+
+## 🛠️ Architecture & Workflow
+
+### 1. Ingestion (`/ai-db-embedding`)
+
+- Scans the `storage/app/rag-data` directory
+- Dispatches queued jobs
+- Extracts text using specialized parsers
+- Segments content into overlapping chunks
+- Requests embeddings from Jina AI
+- Persists chunks and embeddings into MySQL
+
+### 2. Retrieval & Generation (`/ai-chat`)
+
+- Generates an embedding for the user's question
+- Executes Cosine Similarity search across stored embeddings
+- Retrieves the top 3 most relevant chunks
+- Injects the retrieved context into the system prompt
+- Requests a grounded response from Groq
+
+---
+
+<!-- #endregion -->
+
+<!-- #region CoreComponent -->
+
+## 📦 Core Component Breakdown
+
+### 1. Document Processing Pipeline
+
+Documents (PDF/TXT) are parsed using a Factory-based architecture that resolves the correct parser based on file type.
+
+This ensures extensibility for future formats without modifying core logic.
+
+### 2. Smart Text Chunking
+
+The ChunkingService uses a sliding-window strategy with overlap to preserve context between segments and improve retrieval quality.
+
+### 3. Embedding Generation
+
+Text chunks are converted into high-dimensional vector embeddings using Jina AI (jina-embeddings-v2-base-en), enabling semantic search over raw text.
+
+### 4. Vector Similarity Search
+
+Similarity = (A · B) / (||A|| × ||B||)
+
+A custom implementation of cosine similarity is used to compare query embeddings against stored vectors in MySQL.
+
+### 5. End-to-End RAG Flow
+
+Document ingestion → Parsing → Chunking → Embedding → Storage → Retrieval → LLM Response
+
+---
+
+<!-- #endregion -->
+
+<!-- #region InstallationSetup -->
+
+## ⚡ Installation & Setup
+
+## ⚡ Installation & Setup
+
+### Prerequisites
+
+- PHP 8.2+
+- Composer 2.x
+- MySQL 8.x
+- Jina AI API Key
+- Groq API Key
+- Laravel Queue Driver (database or redis)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/laravel-rag.git
+cd laravel-rag
+```
+
+### 2. Install dependencies
+
+```php
+composer install
+```
+
+### 3. Configure environment variables
+
+Copy the example file:
+
+```bash
+cp .env.example .env
+```
+
+Then configure:
+
+```php
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=rag
+DB_USERNAME=root
+DB_PASSWORD=
+
+QUEUE_CONNECTION=database
+
+JINA_API_KEY=your_jina_ai_key_here
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+### 4. Generate application key
+
+```php
+php artisan key:generate
+```
+
+### 5. Run database migrations
+
+```php
+php artisan migrate
+```
+
+### 7. Start queue worker
+
+php artisan queue:work
+
+### 8. Start the application
+
+php artisan serve
+
+
+
+---
+
+<!-- #endregion -->
+
+<!-- #region UsageExamples -->
+
+
+---
+<!-- #endregion -->
+
+aa
+## 🚀 Features
+## 📦 Installation
+## 🛠️ Development
+## 📖 Documentation
+## 🧪 Testing
+## 🤝 Contributing
+
+## 💻 Tech Stack
+## 🚀 Key Features
+
+## 🛰️ API Endpoints
+## 💾 Database Infrastructure & Scale Notes
+## 📦 Core Component Breakdown
+## ⚡ Installation & Setup
+## 🔍 Usage Examples
+
+## 📊 Database Infrastructure & Scaling
+
+
+Tech Stack
+Key Features
+Architecture & Workflow
+Core Component Breakdown
+Database Infrastructure & Scaling
+API Endpoints
+Installation & Setup
+Usage Examples
+
+
+
+
+
+## Design Decisions 
+    ### Why Laravel?
+
+    To demonstrate that modern AI systems can be
+    implemented using traditional web frameworks.
+
+    ### Why MySQL Instead of Pinecone?
+
+    To avoid external infrastructure and keep the
+    project self-contained.
+
+    ### Why Queue Processing?
+
+    Embedding generation is the most expensive
+    operation and should not block HTTP requests.
+### 
+
+---
+
+## TXT/PDF
+    │
+    ▼
+    Parser
+    │
+    ▼
+    Chunking
+    │
+    ▼
+    Jina AI
+    │
+    ▼
+    MySQL
+    │
+    ▼
+    Similarity Search
+    │
+    ▼
+    Groq
+    │
+    ▼
+    Response
 
 ---
 
@@ -40,22 +300,31 @@ GET                /ai-chat            Full RAG workflow. Takes a question, sear
 
 ---
 
-## 💻 Tech Stack
 
-Framework: Laravel 11+ 
-Database: MySQL
-Queue Driver: Database / Redis
-Embeddings Provider: Jina AI (jina-embeddings-v2-base-en)
-LLM Orchestration: Groq API (llama-3.3-70b-versatile)
-Dependencies: smalot/pdfparser (for PDF text extraction)
 
----
+## 💾 Database Infrastructure & Scale Notes
 
-## 💾 Database Infrastructure Notes
+The current database schema implements the `embedding` column as a standard `JSON` data type. This guarantees absolute compatibility across development environments running MySQL 8.x, PostgreSQL, or SQLite (for testing purposes).
 
-The system architecture handles vector search depending on the MySQL environment version:
-* **Development (MySQL 8.0.x):** Utilizes optimized SQL `JSON_EXTRACT` mathematical operations to compute dot products directly inside the database engine, avoiding PHP memory bottlenecks (`Embedding::all()` overhead).
-* **Production/Upgrade (MySQL 8.4+ LTS):** Migrates the schema to use the native `VECTOR(768)` data type paired with the hardware-accelerated `VECTOR_DISTANCE(..., 'COSINE')` function for enterprise-grade performance.
+### 🚀 Production & Enterprise Scaling (MySQL 9.0+)
+
+For production systems or high-traffic enterprise environments, it is highly recommended to upgrade to **MySQL 9.0+** to leverage native vector architecture:
+
+1. **Schema Migration:** Change the `embedding` column type from `JSON` to the native `VECTOR(768)`:
+   ```sql
+   ALTER TABLE embeddings MODIFY COLUMN embedding VECTOR(768) NOT NULL;
+   ```
+
+2. **Hardware-Accelerated Vector Search:** Instead of decoding JSON strings and performing math via PHP loops or complex `JSON_EXTRACT` operations, you can rewrite the semantic search query using the hardware-accelerated `VECTOR_DISTANCE()` function directly in the database engine:
+   ```sql
+   SELECT id, content, VECTOR_DISTANCE(embedding, :query_vector, 'COSINE') AS distance 
+   FROM embeddings 
+   ORDER BY distance ASC 
+   LIMIT 3;
+   ```
+
+This approach shifts the mathematical workload to the database level, drastically reducing memory overhead and query latency under heavy loads.
+
 
 ---
 
@@ -148,6 +417,12 @@ php artisan serve
 
 ---
 
+
+
+
+
+
+
 ## 🔍 Usage Examples
 
 1. Ingest Data:
@@ -173,4 +448,40 @@ Response
   "message": "response"
 }
 ```
+
+
+## Screenshots
+
+### Ingestion Process
+
+[imagem]
+
+### Semantic Search
+
+[imagem]
+
+### AI Chat Response
+
+[imagem]
+
+
+## Performance
+
+Dataset:
+- 150 documents
+- 1,200 chunks
+- 768-dimensional embeddings
+
+Average Retrieval Time:
+- PHP Cosine Search: 80ms
+
+Future Optimization:
+- MySQL VECTOR indexes
+- Approximate Nearest Neighbor search
+
+
+
+
+aaaa
+
 

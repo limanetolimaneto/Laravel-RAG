@@ -12,22 +12,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('embeddings', function (Blueprint $table) {
+         Schema::create('embeddings', function (Blueprint $table) {
             $table->id();
             $table->string('document_name');
             $table->longText('content');
-            // Embedding field based on Mysql version
-            // json <= '8.4.0' >= vector
-            $pdo = DB::connection()->getPdo();
-            $version = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-            if (version_compare($version, '8.4.0', '>=')) {
-                $table->raw('embedding VECTOR(768) NOT NULL');
-            } else {
-                $table->json('embedding');
-            }
+            $table->json('embedding');
             $table->integer('chunk_index');
             $table->timestamps();
         });
+          
     }
 
     /**
