@@ -17,8 +17,25 @@ class IngestDocumentJob implements ShouldQueue
 {
     use Queueable, InteractsWithQueue;
 
+    /**
+     * Job responsible for processing a document and persisting its vector embeddings.
+    */
     public function __construct(protected string $fileName){}
 
+    /**
+     * Execute the document ingestion pipeline:
+     * 1. Select the correct parser for the file type
+     * 2. Parse raw document content
+     * 3. Split content into chunks
+     * 4. Generate embeddings for each chunk
+     * 5. Persist embeddings in the database inside a transaction
+     *
+     * @param DocumentParserFactory $parser
+     * @param ChunkingService $chunk
+     * @param EmbeddingService $embed
+     *
+     * @throws EmbeddingPersistenceException
+    */
     public function handle(DocumentParserFactory $parser, ChunkingService $chunk, EmbeddingService $embed): void
     {
         $parserClass = $parser->make($this->fileName);

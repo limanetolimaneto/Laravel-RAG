@@ -4,20 +4,17 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\File;
 
+/**
+ * Service responsible for retrieving available documents
+ * from the local RAG (Retrieval-Augmented Generation) storage directory.
+*/
 class DocumentListService
 {
-    // O codigo: 
-    // ===============
-    // protected $list;
-    // private function setList(){
-    //     $this->list = File::files(storage_path('app'));
-    // }
-    // public function list(){
-    //     $this->setList();
-    //     return $this->list;
-    // }
-    // ===============
-    // Pode ser resumido por:
+    /**
+     * Returns a list of files available for ingestion.
+     *
+     * @return array<File>
+    */
     public function list(): array
     {
         return File::files(storage_path('app/rag-data'));
