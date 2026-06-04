@@ -196,6 +196,12 @@ php artisan serve
 ---
 <!-- #endregion -->
 
+
+## 📚 Sample Dataset
+
+The `storage/app/rag-data` directory contains sample documents used as the knowledge base for demonstration purposes.
+
+
 aa
 ## 🚀 Features
 ## 📦 Installation
